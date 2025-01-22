@@ -155,14 +155,14 @@ const diepThemes = {
             category: "World",
         },
         "worldBorderColor": {
-            name: "Grid Color",
+            name: "World Border Color",
             command: "ren_border_color",
             type: "color",
             defaultValue: "797979",
             category: "World",
         },
         "worldBorderOpacity": {
-            name: "Grid Opacity",
+            name: "World Border Opacity",
             command: "ren_border_color_alpha",
             type: "opacity",
             defaultValue: 0.1,
@@ -349,7 +349,7 @@ const diepThemes = {
             category: "Interface Elements",
         },
         "showTankUpgrades": {
-            name: "Show Tamk Upgrades",
+            name: "Show Tank Upgrades",
             command: "ren_upgrades",
             type: "boolean",
             defaultValue: true,
