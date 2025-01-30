@@ -1788,7 +1788,7 @@ const diepThemes = {
             for (let variableKey in diepThemes.themeVariables) {
                 const variableInfo = diepThemes.themeVariables[variableKey]
                 const value = theme.values[variableKey]
-                if (value) {
+                if (value != undefined) {
                     if (variableInfo.type == "color") {
                         const validated = this.validateColor(value)
                         if (!validated) return null
@@ -1829,7 +1829,7 @@ const diepThemes = {
             for (let variableKey in diepThemes.otherVariables) {
                 const variableInfo = diepThemes.otherVariables[variableKey]
                 const value = otherSettings[variableKey]
-                if (otherSettings) {
+                if (value != undefined) {
                     if (variableInfo.type == "color") {
                         const validated = this.validateColor(value)
                         if (!validated) return null
