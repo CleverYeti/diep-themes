@@ -895,6 +895,9 @@ const diepThemes = {
                 #diep-themes-browse-menu > .content > .theme-grid > .theme > .bottom-bar > .info > .name {
                     color: var(--diep-themes-text-1);
                 }
+                #diep-themes-browse-menu > .content > .theme-grid > .theme > .bottom-bar > .info[data-active="true"] > .name {
+                    color: white !important;
+                }
                 #diep-themes-browse-menu > .content > .theme-grid > .theme > .bottom-bar > .info > .author {
                     font-size: 0.75rem;
                     display: flex;
@@ -1586,6 +1589,7 @@ const diepThemes = {
         if (variableInfo.type == "boolean") diepThemes.window.input.execute(`${variableInfo.command} ${value}`);
         if (variableInfo.type == "uiColors") diepThemes.window.input.execute(`${variableInfo.command} ${value.map(v => "0x" + v).join(" ")}`);
         if (variableInfo.type == "opacity") diepThemes.window.input.execute(`${variableInfo.command} ${value}`);
+        if (variableInfo.command == "ren_grid_base_alpha") diepThemes.window.input.execute(`ren_solid_background  ${value == 0}`)
     },
 
     applyOtherSettings: function() {
