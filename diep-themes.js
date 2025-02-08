@@ -357,22 +357,72 @@ const diepThemes = {
         },
     },
 
+    shadowVariables: {
+        "enableShadow": {
+            name: "Enable Shadows (performance hit)",
+            type: "boolean",
+            defaultValue: false,
+            category: "Shadows",
+        },
+        "shadowRadius": {
+            name: "Blur Radius",
+            type: "opacity",
+            defaultValue: 10,
+            category: "Shadows",
+        },
+        "shadowX": {
+            name: "X Offset",
+            type: "opacity",
+            defaultValue: 4,
+            category: "Shadows",
+        },
+        "shadowY": {
+            name: "Y Offset",
+            type: "opacity",
+            defaultValue: 4,
+            category: "Shadows",
+        },
+        "shadowColor": {
+            name: "Shadow Color",
+            type: "color",
+            defaultValue: "000000",
+            category: "Shadows",
+        },
+        "shadowOpacity": {
+            name: "Shadow Opacity",
+            type: "opacity",
+            defaultValue: 0.14,
+            category: "Shadows",
+        }
+    },
+
     settings: {
         currentTheme: null, // uuid
         savedThemes: {
             
         },
+        otherSettings: {
+
+        },
+        shadowSettings: {
+
+        }
     },
 
+    getSettingsDefaultValues: function(info) {
+        return Object.fromEntries(Object.entries(info).map(([key, info]) => {
+            if (info.type == "uiColors") return [key, [...info.defaultValue]]
+            return [key, info.defaultValue]
+        }))
+    },
 
     init: function() {
         diepThemes.window.diepThemes = diepThemes
 
-        
-        diepThemes.settings.otherSettings = Object.fromEntries(Object.entries(diepThemes.otherVariables).map(([key, info]) => {
-            if (info.type == "uiColors") return [key, [...info.defaultValue]]
-            return [key, info.defaultValue]
-        }))
+        // cloning default settings
+        diepThemes.settings.shadowSettings = this.getSettingsDefaultValues(diepThemes.shadowVariables);
+        diepThemes.settings.otherSettings = this.getSettingsDefaultValues(diepThemes.otherVariables);
+        diepThemes.settings.shadowSettings = this.getSettingsDefaultValues(diepThemes.shadowVariables);
 
 		// load settings
 		try {
@@ -388,19 +438,21 @@ const diepThemes = {
                 const validated = diepThemes.validateOtherSettings(savedSettings.otherSettings)
                 if (validated) diepThemes.settings.otherSettings = validated
             }
+            if (savedSettings.shadowSettings) {
+                const validated = diepThemes.validateShadowSettings(savedSettings.shadowSettings)
+                if (validated) diepThemes.settings.shadowSettings = validated
+            }
 		} catch(err) {
             console.warn(err)
             alert("failed to load diep themes settings")
 		}
-
-        if (!diepThemes.settings.savedThemes[diepThemes.settings.currentTheme]) diepThemes.settings.currentTheme = "DEFAULT"
+        
+        // default theme
         diepThemes.settings.savedThemes["DEFAULT"] = {
             "name": "Default Theme",
-            "values": Object.fromEntries(Object.entries(diepThemes.themeVariables).map(([key, info]) => {
-                if (info.type == "uiColors") return [key, [...info.defaultValue]]
-                return [key, info.defaultValue]
-            }))
+            "values": this.getSettingsDefaultValues(diepThemes.themeVariables)
         }
+        if (!diepThemes.settings.savedThemes[diepThemes.settings.currentTheme]) diepThemes.settings.currentTheme = "DEFAULT"
 
         // detecting when ready
         const interval = diepThemes.window.setInterval(function() {
@@ -956,6 +1008,11 @@ const diepThemes = {
 
         // apply the selected theme
         diepThemes.applyTheme(diepThemes.settings.savedThemes[diepThemes.settings.currentTheme])
+        
+        // auto-applying shadows constantly
+        setInterval(() => {
+            this.applyShadowSettings();
+        }, 1000)
     },
 
     injectCSS: function(css) {
@@ -987,6 +1044,7 @@ const diepThemes = {
         // render menu 
         if (diepThemes.currentMenu == "home") {
             const homeMenuEl = diepThemes.window.document.createElement("div")
+            homeMenuEl.addEventListener("click", (event) => event.stopPropagation())
             this.window.document.body.appendChild(homeMenuEl)
             this.currentMenuEl = homeMenuEl
             homeMenuEl.classList.add("diep-themes-menu")
@@ -997,6 +1055,9 @@ const diepThemes = {
                         <ion-icon name="close-outline"></ion-icon>
                     </div>
                     <div class="header">Installed Themes</div>
+                    <div class="button" onclick="diepThemes.setMenu('shadow')">
+                        <ion-icon name="copy" style="transform: rotate(180deg);"></ion-icon>
+                    </div>
                     <div class="button" onclick="diepThemes.setMenu('settings')">
                         <ion-icon name="settings-outline"></ion-icon>
                     </div>
@@ -1068,6 +1129,7 @@ const diepThemes = {
             }
         } else if (diepThemes.currentMenu == "edit") {
             const editMenuEl = diepThemes.window.document.createElement("div")
+            editMenuEl.addEventListener("click", (event) => event.stopPropagation())
             editMenuEl.classList.add("diep-themes-menu")
             editMenuEl.id = "diep-themes-edit-menu"
             editMenuEl. innerHTML = `
@@ -1223,6 +1285,7 @@ const diepThemes = {
             }
         } else if (diepThemes.currentMenu == "import") {
             const homeMenuEl = diepThemes.window.document.createElement("div")
+            homeMenuEl.addEventListener("click", (event) => event.stopPropagation())
             this.window.document.body.appendChild(homeMenuEl)
             this.currentMenuEl = homeMenuEl
             homeMenuEl.classList.add("diep-themes-menu")
@@ -1367,6 +1430,7 @@ const diepThemes = {
         } else if (diepThemes.currentMenu == "browse") {
             // base menu
             const browseMenuEl = diepThemes.window.document.createElement("div")
+            browseMenuEl.addEventListener("click", (event) => event.stopPropagation())
             this.window.document.body.appendChild(browseMenuEl)
             this.currentMenuEl = browseMenuEl
             browseMenuEl.classList.add("diep-themes-menu")
@@ -1486,6 +1550,7 @@ const diepThemes = {
             }
         } else if (diepThemes.currentMenu == "settings") {
             const settingsMenuEl = diepThemes.window.document.createElement("div")
+            settingsMenuEl.addEventListener("click", (event) => event.stopPropagation())
             settingsMenuEl.classList.add("diep-themes-menu")
             settingsMenuEl.id = "diep-themes-edit-menu"
             settingsMenuEl.innerHTML = `
@@ -1559,6 +1624,85 @@ const diepThemes = {
                     }
                 }
             }
+        } else if (diepThemes.currentMenu == "shadow") {
+            const settingsMenuEl = diepThemes.window.document.createElement("div")
+            settingsMenuEl.addEventListener("click", (event) => event.stopPropagation())
+            settingsMenuEl.classList.add("diep-themes-menu")
+            settingsMenuEl.id = "diep-themes-edit-menu"
+            settingsMenuEl.innerHTML = `
+                <div class="topbar">
+                    <div class="backbutton" onclick="diepThemes.setMenu('home')">
+                        <ion-icon name="chevron-back-outline"></ion-icon>
+                    </div>
+                    <div class="header">Shadow Settings</div>
+                </div>
+                <div class="content">
+
+                </div>
+            `
+            document.body.appendChild(settingsMenuEl)
+            diepThemes.currentMenuEl = settingsMenuEl
+
+            const wrapperEl = settingsMenuEl.querySelector(".content")
+            
+            const categories = []
+            for (let variableKey in diepThemes.shadowVariables) {
+                const variableInfo = diepThemes.shadowVariables[variableKey]
+                if (!categories.includes(variableInfo.category)) categories.push(variableInfo.category)
+            }
+            
+            for (let category of categories) {
+                const categoryTitleEl = document.createElement("div")
+                categoryTitleEl.classList.add("category-title")
+                categoryTitleEl.innerText = category
+                wrapperEl.appendChild(categoryTitleEl)
+                
+                for (let variableKey in diepThemes.shadowVariables) {
+                    const variableInfo = diepThemes.shadowVariables[variableKey]
+                    if (category != variableInfo.category) continue
+                    
+                    const rowEl = document.createElement("div")
+                    rowEl.classList.add("setting-row")
+                    wrapperEl.appendChild(rowEl)
+                    
+                    if (variableInfo.type != "uiColors") {
+                        const nameEl = document.createElement("div")
+                        nameEl.classList.add("setting-name")
+                        nameEl.innerText = variableInfo.name
+                        rowEl.appendChild(nameEl)
+                    }
+                    
+                    if (variableInfo.type == "color") {
+                        rowEl.appendChild(diepThemes.renderInput.color(diepThemes.settings.shadowSettings[variableKey], (val) => {
+                            diepThemes.settings.shadowSettings[variableKey] = val
+                            diepThemes.applyShadowSettings()
+                            diepThemes.saveSettings()
+                        }))
+                    } else if (variableInfo.type == "boolean") {
+                        rowEl.appendChild(diepThemes.renderInput.toggle(diepThemes.settings.shadowSettings[variableKey], (val) => {
+                            diepThemes.settings.shadowSettings[variableKey] = val
+                            diepThemes.applyShadowSettings()
+                            diepThemes.saveSettings()
+                        }))
+                    } else if (variableInfo.type == "opacity") {
+                        rowEl.appendChild(diepThemes.renderInput.opacity(diepThemes.settings.shadowSettings[variableKey], (val) => {
+                            diepThemes.settings.shadowSettings[variableKey] = val
+                            diepThemes.applyShadowSettings()
+                            diepThemes.saveSettings()
+                        }))
+                    } else if (variableInfo.type == "uiColors") {
+                        rowEl.classList.add("ui-colors")
+                        console.log(variableInfo)
+                        for (let i = 7; i >= 0; i--) {
+                            rowEl.appendChild(diepThemes.renderInput.color(diepThemes.settings.shadowSettings[variableKey][i], (val) => {
+                                diepThemes.settings.shadowSettings[variableKey][i] = val
+                                diepThemes.applyShadowSettings()
+                                diepThemes.saveSettings()
+                            }))
+                        }
+                    }
+                }
+            }
         }
 
     },
@@ -1602,6 +1746,19 @@ const diepThemes = {
             if (variableInfo.type == "opacity") diepThemes.window.input.execute(`${variableInfo.command} ${value}`);
         }
         this.saveSettings()
+    },
+
+    applyShadowSettings: function() {
+        let ctx = document.getElementById('canvas').getContext('2d');
+        if (!diepThemes.settings.shadowSettings["enableShadow"]) {
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'rgba(0,0,0,0)';
+        } else {
+            ctx.shadowBlur = diepThemes.settings.shadowSettings["shadowRadius"];
+            ctx.shadowColor = `#${diepThemes.settings.shadowSettings["shadowColor"]}${Math.round(diepThemes.settings.shadowSettings["shadowOpacity"] * 255).toString(16).padStart(2, '0')}`
+            ctx.shadowOffsetX = diepThemes.settings.shadowSettings["shadowX"];
+            ctx.shadowOffsetY = diepThemes.settings.shadowSettings["shadowY"];
+        }
     },
 
     createNewTheme: function() {
@@ -1775,64 +1932,12 @@ const diepThemes = {
         return color
     },
 
-    validateTheme: function(theme) {
+    validateValues: function(variablesInfo, values) {
         try {
-            const output = {
-                "name": "Theme",
-                "author": "",
-                "values": Object.fromEntries(Object.entries(diepThemes.themeVariables).map(([key, info]) => {
-                    if (info.type == "uiColors") return [key, [...info.defaultValue]]
-                    return [key, info.defaultValue]
-                }))
-            }
-            console.log(theme)
-            if (theme.name && typeof theme.name === "string") output.name = (theme.name + "").replace(/[^\w\s]/gi, '')
-            if (theme.author && typeof theme.author === "string") output.author = (theme.author + "").replace(/[^\w\s]/gi, '')
-            if (!theme.values) return null
-            for (let variableKey in diepThemes.themeVariables) {
-                const variableInfo = diepThemes.themeVariables[variableKey]
-                const value = theme.values[variableKey]
-                if (value != undefined) {
-                    if (variableInfo.type == "color") {
-                        const validated = this.validateColor(value)
-                        if (!validated) return null
-                        output.values[variableKey] = validated
-                    }
-                    if (variableInfo.type == "uiColors") {
-                        if (!Array.isArray(value)) return null
-                        if (!value.length == 8) return null
-                        for (let i = 0; i < 8; i++) {
-                            const validated = this.validateColor(value[i])
-                            if (!validated) return null
-                            output.values[variableKey][i] = validated
-                        }
-                    }
-                    if (variableInfo.type == "boolean") {
-                        if (typeof value !== "boolean") return null
-                        output.values[variableKey] = value
-                    }
-                    if (variableInfo.type == "opacity") {
-                        if (typeof value !== "number") return null
-                        output.values[variableKey] = value
-                    }
-                }
-            }
-            return output
-        } catch (error) {
-            console.warn(error)
-            return null
-        }
-    },
-
-    validateOtherSettings: function(otherSettings) {
-        try {
-            const output = Object.fromEntries(Object.entries(diepThemes.otherVariables).map(([key, info]) => {
-                if (info.type == "uiColors") return [key, [...info.defaultValue]]
-                return [key, info.defaultValue]
-            }))
-            for (let variableKey in diepThemes.otherVariables) {
-                const variableInfo = diepThemes.otherVariables[variableKey]
-                const value = otherSettings[variableKey]
+            const output = this.getSettingsDefaultValues(variablesInfo);
+            for (let variableKey in variablesInfo) {
+                const variableInfo = variablesInfo[variableKey]
+                const value = values[variableKey]
                 if (value != undefined) {
                     if (variableInfo.type == "color") {
                         const validated = this.validateColor(value)
@@ -1863,6 +1968,35 @@ const diepThemes = {
             console.warn(error)
             return null
         }
+        
+    },
+
+    validateTheme: function(theme) {
+        try {
+            const output = {
+                "name": "Theme",
+                "author": "",
+                "values": this.getSettingsDefaultValues(this.themeVariables)
+            }
+            console.log(theme)
+            if (theme.name && typeof theme.name === "string") output.name = (theme.name + "").replace(/[^\w\s]/gi, '')
+            if (theme.author && typeof theme.author === "string") output.author = (theme.author + "").replace(/[^\w\s]/gi, '')
+            if (!theme.values) return null
+            const validated = this.validateValues(this.themeVariables, theme.values)
+            output.values = validated
+            if (validated == null) return nulls
+            return output
+        } catch (error) {
+            console.warn(error)
+            return null
+        }
+    },
+
+    validateOtherSettings: function(values) {
+        return this.validateValues(this.otherVariables, values)
+    },
+    validateShadowSettings: function(values) {
+        return this.validateValues(this.shadowVariables, values)
     },
 
     renderThemePreview: function(theme) {
