@@ -109,6 +109,13 @@ const diepThemes = {
             defaultValue: "768DFC",
             category: "Shapes",
         },
+        "hexagonColor": {
+            name: "Hexagon Color",
+            command: "net_replace_color 18",
+            type: "color",
+            defaultValue: "35C5DB",
+            category: "Shapes",
+        },
         "shinyShapeColor": {
             name: "Shiny Shape Color",
             command: "net_replace_color 7",
